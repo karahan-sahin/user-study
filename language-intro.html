@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Next Section — Duet BSL Translation Study</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .lang-badge {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: .85rem;
+      padding: 4px 14px;
+      border-radius: 99px;
+      letter-spacing: .04em;
+      margin-bottom: 20px;
+    }
+    .task-count-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: .9rem;
+      color: var(--text-muted);
+      margin-top: 24px;
+    }
+    .task-count-pill strong { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="header-logo" id="header-title">Sign Language Study</span>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <span class="progress-label" id="progress-label"></span>
+</header>
+
+<main class="page">
+  <div class="card">
+    <span class="lang-badge" id="lang-badge"></span>
+    <h1 id="lang-title"></h1>
+    <p class="subtitle" id="lang-desc"></p>
+
+    <div class="task-count-pill">
+      <span>&#127916;</span>
+      <span>This section contains <strong id="task-count"></strong> to rate.</span>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-secondary" id="prev-btn">&larr; Back</button>
+      <button class="btn btn-primary"  id="next-btn">Begin &rarr;</button>
+    </div>
+  </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/study.js"></script>
+<script>
+  const params   = new URLSearchParams(window.location.search);
+  const flatIdx  = parseInt(params.get("idx") || "0", 10);
+  const flatList = STUDY_CONFIG._flatTasks;
+
+  if (flatIdx < 0 || flatIdx >= flatList.length) Study.goto("index.html");
+
+  const task       = flatList[flatIdx];
+  const totalSteps = 2 + flatList.length;
+  const currentStep = 2 + flatIdx; // sits just before the task at flatIdx
+
+  document.getElementById("header-title").textContent = STUDY_CONFIG.title;
+  Study.renderProgress(currentStep, totalSteps);
+
+  document.getElementById("lang-badge").textContent  = "New Section";
+  document.getElementById("lang-title").textContent  = task.langLabel;
+  document.getElementById("lang-desc").textContent   = task.langDesc;
+
+  // Count how many tasks belong to this language in this experiment
+  const sectionCount = flatList.filter(
+    t => t.expId === task.expId && t.langId === task.langId
+  ).length;
+  document.getElementById("task-count").textContent =
+    sectionCount + (sectionCount === 1 ? " video" : " videos");
+
+  document.getElementById("next-btn").addEventListener("click", () => {
+    Study.goto("experiment.html?idx=" + flatIdx);
+  });
+
+  document.getElementById("prev-btn").addEventListener("click", () => {
+    if (flatIdx > 0) {
+      Study.goto("experiment.html?idx=" + (flatIdx - 1));
+    } else {
+      Study.goto("assessment.html");
+    }
+  });
+</script>
+</body>
+</html>

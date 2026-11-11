@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Background — Duet BSL Translation Study</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header>
+  <span class="header-logo" id="header-title">Sign Language Study</span>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <span class="progress-label" id="progress-label"></span>
+</header>
+
+<main class="page">
+  <div class="card">
+    <p class="section-label">Background — Step 1</p>
+    <h2>Your Signing Background</h2>
+    <p class="subtitle" style="margin-bottom:24px;">
+      Please select the option that best describes your current sign language proficiency.
+      There is no right or wrong answer — this helps us understand our participants.
+    </p>
+
+    <div class="level-grid" id="level-grid"></div>
+
+    <p id="validation-msg" style="color:#dc2626; font-size:.88rem; min-height:1.2em;"></p>
+
+    <div class="btn-group">
+      <a class="btn btn-secondary" href="index.html">&larr; Back</a>
+      <button class="btn btn-primary" id="next-btn" disabled>
+        Next &rarr;
+      </button>
+    </div>
+  </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/study.js"></script>
+<script>
+  const totalSteps = 2 + STUDY_CONFIG._flatTasks.length; // intro + assessment + all tasks
+
+  document.getElementById("header-title").textContent = STUDY_CONFIG.title;
+  document.getElementById("progress-label").textContent = "2 / " + totalSteps;
+  Study.renderProgress(2, totalSteps);
+
+  // Build level cards
+  const grid = document.getElementById("level-grid");
+  const nextBtn = document.getElementById("next-btn");
+  let selectedLevel = null;
+
+  STUDY_CONFIG.signingLevels.forEach(level => {
+    const card = document.createElement("div");
+    card.className = "level-card";
+    card.dataset.id = level.id;
+    card.innerHTML = `<div class="level-name">${level.name}</div><div class="level-desc">${level.description}</div>`;
+    card.addEventListener("click", () => {
+      grid.querySelectorAll(".level-card").forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+      selectedLevel = level.id;
+      nextBtn.disabled = false;
+      document.getElementById("validation-msg").textContent = "";
+    });
+    grid.appendChild(card);
+  });
+
+  // Restore previous selection if navigating back
+  const saved = Study.getState().signingLevel;
+  if (saved) {
+    const existing = grid.querySelector(`[data-id="${saved}"]`);
+    if (existing) {
+      existing.classList.add("selected");
+      selectedLevel = saved;
+      nextBtn.disabled = false;
+    }
+  }
+
+  nextBtn.addEventListener("click", () => {
+    if (!selectedLevel) {
+      document.getElementById("validation-msg").textContent = "Please select an option before continuing.";
+      return;
+    }
+    Study.setState({ signingLevel: selectedLevel });
+    // Always show the language intro before the first task
+    Study.goto("language-intro.html?idx=0");
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example — Duet BSL Translation Study</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header>
+  <span class="header-logo" id="header-title">Duet Study</span>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <span class="progress-label" id="progress-label"></span>
+</header>
+
+<main class="page">
+  <div class="card wide" id="exp-card">
+
+    <div class="experiment-header">
+      <div class="exp-num" id="exp-num"></div>
+      <div class="source-box">
+        <span class="source-label">English text</span>
+        <p class="source-text" id="source-text"></p>
+      </div>
+    </div>
+
+    <p class="selection-hint">
+      Watch the translation, then answer the three questions below it.
+      You can watch the video as many times as you like.
+    </p>
+
+    <div class="video-list" id="video-list"></div>
+
+    <p id="validation-msg"
+       style="color:#dc2626; font-size:.88rem; min-height:1.2em; text-align:center;"></p>
+
+    <div class="btn-group">
+      <button class="btn btn-secondary" id="prev-btn">&larr; Previous</button>
+      <button class="btn btn-primary"  id="next-btn" disabled>Next &rarr;</button>
+    </div>
+  </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/study.js"></script>
+<script>
+  // ── Resolve current example from URL index ───────────────────────
+  const params   = new URLSearchParams(window.location.search);
+  const flatIdx  = parseInt(params.get("idx") || "0", 10);
+  const flatList = STUDY_CONFIG._flatTasks;
+
+  if (flatIdx < 0 || flatIdx >= flatList.length) {
+    Study.goto("index.html");
+  }
+
+  const task      = flatList[flatIdx];     // one PAGE = one video of one example
+  const QUESTIONS = STUDY_CONFIG.questions;
+
+  // ── Seeded shuffle (consistent per participant × example) ─────────
+  function seededShuffle(arr, seed) {
+    let s = seed | 0;
+    const rand = () => { s = Math.imul(s ^ (s >>> 16), 0x45d9f3b) ^ (s >>> 16); return (s >>> 0) / 0x100000000; };
+    const out = [...arr];
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+  }
+  function strSeed(str) { let h = 0; for (const c of str) h = Math.imul(31, h) + c.charCodeAt(0) | 0; return h; }
+
+  const participantId  = Study.getState().participantId || "";
+  // Which video fills this page's slot — shuffled per participant within the example.
+  const shuffledVideos = seededShuffle(task.videos, strSeed(participantId + task.taskId));
+  const video          = shuffledVideos[task.slot];
+
+  // total steps: intro(1) + assessment(1) + one page per video(N)
+  const totalSteps  = 2 + flatList.length;
+  const currentStep = 3 + flatIdx;
+
+  document.getElementById("header-title").textContent = STUDY_CONFIG.title;
+  Study.renderProgress(currentStep, totalSteps);
+
+  document.getElementById("exp-num").textContent =
+    task.expLabel + "  ›  " + task.langLabel + "  ›  " + task.taskLabel +
+    "  (video " + (flatIdx + 1) + " of " + flatList.length + ")";
+
+  const sourceEl = document.getElementById("source-text");
+  if (task.english && task.english.trim()) {
+    sourceEl.textContent = task.english;
+  } else {
+    sourceEl.textContent = "(English text not provided)";
+    sourceEl.classList.add("source-missing");
+  }
+
+  // ── Restore saved responses for this example ──────────────────────
+  // Response shape (per example): { ratings: { A: { understand, meaning, quality }, … }, videoFiles }
+  // Each page fills in one video's entry; the example object accumulates across pages.
+  const state     = Study.getState();
+  const responses = state.responses || {};
+  const saved     = (((responses[task.expId] || {})[task.langId] || {})[task.annoId] || {})[task.taskId] || null;
+
+  // ratings[videoId] = { understand: n, meaning: n, quality: n }
+  let ratings = {};
+  if (saved && saved.ratings) {
+    for (const vid in saved.ratings) ratings[vid] = { ...saved.ratings[vid] };
+  }
+
+  const nextBtn = document.getElementById("next-btn");
+
+  // Only this page's single video must be fully answered to continue.
+  function allAnswered() {
+    return QUESTIONS.every(q => ratings[video.id] && ratings[video.id][q.id] !== undefined);
+  }
+
+  function refreshNextBtn() {
+    nextBtn.disabled = !allAnswered();
+  }
+
+  // ── Build the single video card for this page ─────────────────────
+  const list = document.getElementById("video-list");
+  const src  = "/vid/" + task.videoPath + "/" + video.file.replace(/\.mp4$/i, "");
+
+  const row = document.createElement("div");
+  row.className = "video-row";
+  row.dataset.id = video.id;
+
+  const vidWrap = document.createElement("div");
+  vidWrap.className = "vid-wrap";
+
+  const caption = document.createElement("div");
+  caption.className = "vid-caption";
+  caption.textContent = video.label && video.label.trim() ? video.label : "Translation";
+
+  const videoEl = document.createElement("video");
+  videoEl.src      = src;
+  videoEl.controls = true;
+  videoEl.loop     = false;
+  videoEl.preload  = "metadata";
+
+  vidWrap.appendChild(caption);
+  vidWrap.appendChild(videoEl);
+
+  const qWrap = document.createElement("div");
+  qWrap.className = "vid-questions";
+
+  QUESTIONS.forEach(q => {
+    const qRow = document.createElement("div");
+    qRow.className = "q-row";
+
+    const qText = document.createElement("div");
+    qText.className = "q-text";
+    qText.textContent = q.text;
+
+    const scale = document.createElement("div");
+    scale.className = "scale";
+
+    q.labels.forEach((label, i) => {
+      const score = i + 1;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "scale-btn";
+      if (ratings[video.id] && ratings[video.id][q.id] === score) btn.classList.add("rated");
+      btn.innerHTML = `<span class="num">${score}</span><span class="lbl">${label}</span>`;
+
+      btn.addEventListener("click", () => {
+        if (!ratings[video.id]) ratings[video.id] = {};
+        ratings[video.id][q.id] = score;
+        scale.querySelectorAll(".scale-btn").forEach(b => b.classList.remove("rated"));
+        btn.classList.add("rated");
+        document.getElementById("validation-msg").textContent = "";
+        refreshNextBtn();
+      });
+
+      scale.appendChild(btn);
+    });
+
+    qRow.appendChild(qText);
+    qRow.appendChild(scale);
+    qWrap.appendChild(qRow);
+  });
+
+  row.appendChild(vidWrap);
+  row.appendChild(qWrap);
+  list.appendChild(row);
+
+  refreshNextBtn();
+
+  // ── Save current responses to state ───────────────────────────────
+  function saveResponse() {
+    if (Object.keys(ratings).length === 0) return;
+    if (!responses[task.expId])                           responses[task.expId] = {};
+    if (!responses[task.expId][task.langId])              responses[task.expId][task.langId] = {};
+    if (!responses[task.expId][task.langId][task.annoId]) responses[task.expId][task.langId][task.annoId] = {};
+    const videoFiles = Object.fromEntries(task.videos.map(v => [v.id, v.file]));
+    responses[task.expId][task.langId][task.annoId][task.taskId] = { ratings, videoFiles };
+    Study.setState({ responses });
+  }
+
+  // ── Navigation ────────────────────────────────────────────────────
+  if (flatIdx === flatList.length - 1) {
+    nextBtn.innerHTML = "Finish &#10003;";
+  }
+
+  nextBtn.addEventListener("click", () => {
+    if (!allAnswered()) {
+      document.getElementById("validation-msg").textContent =
+        "Please answer all three questions before continuing.";
+      return;
+    }
+    saveResponse();
+    // Build id→file map so the server can write real filenames to the CSV
+    const videoFiles = Object.fromEntries(task.videos.map(v => [v.id, v.file]));
+    Study.submitResponse(task, ratings, videoFiles);
+    const nextIdx = flatIdx + 1;
+    if (nextIdx >= flatList.length) {
+      Study.goto("complete.html");
+    } else if (flatList[nextIdx].isFirstInLanguage) {
+      Study.goto("language-intro.html?idx=" + nextIdx);
+    } else {
+      Study.goto("experiment.html?idx=" + nextIdx);
+    }
+  });
+
+  document.getElementById("prev-btn").addEventListener("click", () => {
+    saveResponse();
+    if (flatIdx - 1 >= 0) {
+      Study.goto("experiment.html?idx=" + (flatIdx - 1));
+    } else {
+      Study.goto("assessment.html");
+    }
+  });
+</script>
+</body>
+</html>

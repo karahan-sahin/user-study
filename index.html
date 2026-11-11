@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Duet — BSL Translation Study</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header>
+  <span class="header-logo" id="header-title">Sign Language Study</span>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <span class="progress-label" id="progress-label">Introduction</span>
+</header>
+
+<main class="page">
+  <div class="card">
+    <h1 id="study-title">Welcome to the Duet BSL Translation Study</h1>
+    <p class="subtitle" id="study-subtitle">
+      Thank you for participating. This study evaluates how well short sign language
+      videos translate English sentences. Your responses will help improve
+      computational sign language translation.
+    </p>
+
+    <ul class="info-list">
+      <li>
+        <span class="icon">&#128250;</span>
+        <span>
+          For each example you will read an English sentence, watch one or more
+          sign language translations of it, and answer three short questions about
+          each translation on a 5-point scale.
+        </span>
+      </li>
+      <li>
+        <span class="icon">&#128336;</span>
+        <span>
+          The study takes <strong>less than 10 minutes</strong> to complete.
+        </span>
+      </li>
+      <li>
+        <span class="icon">&#128100;</span>
+        <span>
+          First we will ask one short question about your signing background.
+          No sign language knowledge is required to participate.
+        </span>
+      </li>
+    </ul>
+
+    <hr class="divider" />
+
+    <p style="font-size:.88rem; color:var(--text-muted); line-height:1.6;">
+      Participation is voluntary and anonymous. You may stop at any time.
+      By clicking <strong>Start Study</strong> you agree to participate.
+    </p>
+
+    <div class="btn-group" style="justify-content:flex-end;">
+      <a class="btn btn-primary" href="assessment.html" id="start-btn">
+        Start Study &rarr;
+      </a>
+    </div>
+  </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/study.js"></script>
+<script>
+  Study.clearState();
+  Study.ensureParticipantId();
+
+  document.getElementById("header-title").textContent = STUDY_CONFIG.title;
+  document.getElementById("study-title").textContent = "Welcome to the " + STUDY_CONFIG.title;
+  if (STUDY_CONFIG.institution) {
+    document.getElementById("study-subtitle").textContent +=
+      " — " + STUDY_CONFIG.institution + ".";
+  }
+</script>
+</body>
+</html>

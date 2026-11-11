@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complete — Duet BSL Translation Study</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .spinner {
+      display: inline-block;
+      width: 48px; height: 48px;
+      border: 5px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin-bottom: 24px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #content { display: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="header-logo" id="header-title">Sign Language Study</span>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:100%"></div>
+  </div>
+  <span class="progress-label">Complete</span>
+</header>
+
+<main class="page">
+  <div class="card text-center">
+
+    <!-- Saving state -->
+    <div id="saving">
+      <div class="spinner"></div>
+      <h2 style="color:var(--text-muted);">Saving&hellip;</h2>
+    </div>
+
+    <!-- Done state -->
+    <div id="content">
+      <div style="font-size:3rem; margin-bottom:16px;">&#127881;</div>
+      <h1>Thank You!</h1>
+      <p class="subtitle">Your responses have been saved. You may now close this page.</p>
+    </div>
+
+  </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/server-port.js"></script>
+<script src="js/study.js"></script>
+<script>
+  document.getElementById("header-title").textContent = STUDY_CONFIG.title;
+
+  Study.saveResults()
+    .then(() => {
+      document.getElementById("saving").style.display  = "none";
+      document.getElementById("content").style.display = "block";
+    })
+    .catch(() => {
+      // Even on error show the done message — don't expose details to participant
+      document.getElementById("saving").style.display  = "none";
+      document.getElementById("content").style.display = "block";
+    });
+</script>
+</body>
+</html>
