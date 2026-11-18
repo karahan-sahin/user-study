@@ -28,7 +28,7 @@
     </div>
 
     <p class="selection-hint">
-      Watch the translation, then answer the three questions below it.
+      Watch the translation, then answer the six questions below it.
       You can watch the video as many times as you like.
     </p>
 
@@ -51,12 +51,17 @@
   const params   = new URLSearchParams(window.location.search);
   const flatIdx  = parseInt(params.get("idx") || "0", 10);
   const flatList = STUDY_CONFIG._flatTasks;
+  const NPAGES    = Math.min(STUDY_CONFIG.pagesPerParticipant || flatList.length, flatList.length);
 
-  if (flatIdx < 0 || flatIdx >= flatList.length) {
+  if (flatIdx < 0 || flatIdx >= NPAGES) {
     Study.goto("index.html");
   }
 
-  const task      = flatList[flatIdx];     // one PAGE = one video of one example
+  // Page order is shuffled per participant; one PAGE = one example showing ONE video.
+  const participantId = Study.getState().participantId || "";
+  const pageOrder = seededShuffle([...flatList.keys()], strSeed(participantId + "|order")).slice(0, NPAGES);
+  const taskPos   = pageOrder[flatIdx];
+  const task      = flatList[taskPos];
   const QUESTIONS = STUDY_CONFIG.questions;
 
   // ── Seeded shuffle (consistent per participant × example) ─────────
@@ -72,21 +77,30 @@
   }
   function strSeed(str) { let h = 0; for (const c of str) h = Math.imul(31, h) + c.charCodeAt(0) | 0; return h; }
 
-  const participantId  = Study.getState().participantId || "";
-  // Which video fills this page's slot — shuffled per participant within the example.
-  const shuffledVideos = seededShuffle(task.videos, strSeed(participantId + task.taskId));
-  const video          = shuffledVideos[task.slot];
+  // Condition shown on this page (see CONDITION_PATTERN in generate-config.js): the pattern is
+  // shuffled per participant and page i uses slot pattern[i], so every participant sees each
+  // condition the same number of times. If the sentence has no video in that slot, the next
+  // slot that has one is used.
+  const NSLOTS  = STUDY_CONFIG.conditionSlots || 5;
+  const PATTERN = seededShuffle(STUDY_CONFIG.conditionPattern || [...Array(NSLOTS).keys()],
+                                strSeed(participantId + "|cond"));
+  const slotOf  = v => parseInt(v.file, 10);
+  let video = null;
+  const base = PATTERN[flatIdx % PATTERN.length];
+  for (let k = 0; k < NSLOTS && !video; k++) {
+    const slot = (base + k) % NSLOTS;
+    video = task.videos.find(v => slotOf(v) === slot) || null;
+  }
 
   // total steps: intro(1) + assessment(1) + one page per video(N)
-  const totalSteps  = 2 + flatList.length;
-  const currentStep = 3 + flatIdx;
+  const totalSteps  = 3 + NPAGES;
+  const currentStep = 4 + flatIdx;
 
   document.getElementById("header-title").textContent = STUDY_CONFIG.title;
   Study.renderProgress(currentStep, totalSteps);
 
   document.getElementById("exp-num").textContent =
-    task.expLabel + "  ›  " + task.langLabel + "  ›  " + task.taskLabel +
-    "  (video " + (flatIdx + 1) + " of " + flatList.length + ")";
+    "Example " + (flatIdx + 1) + " of " + NPAGES;
 
   const sourceEl = document.getElementById("source-text");
   if (task.english && task.english.trim()) {
@@ -97,7 +111,7 @@
   }
 
   // ── Restore saved responses for this example ──────────────────────
-  // Response shape (per example): { ratings: { A: { understand, meaning, quality }, … }, videoFiles }
+  // Response shape (per example): { ratings: { A: { understand, meaning, quality, grammar, visual, natural }, … }, videoFiles }
   // Each page fills in one video's entry; the example object accumulates across pages.
   const state     = Study.getState();
   const responses = state.responses || {};
@@ -133,7 +147,7 @@
 
   const caption = document.createElement("div");
   caption.className = "vid-caption";
-  caption.textContent = video.label && video.label.trim() ? video.label : "Translation";
+  caption.textContent = "Translation";
 
   const videoEl = document.createElement("video");
   videoEl.src      = src;
@@ -195,28 +209,28 @@
     if (!responses[task.expId])                           responses[task.expId] = {};
     if (!responses[task.expId][task.langId])              responses[task.expId][task.langId] = {};
     if (!responses[task.expId][task.langId][task.annoId]) responses[task.expId][task.langId][task.annoId] = {};
-    const videoFiles = Object.fromEntries(task.videos.map(v => [v.id, v.file]));
+    const videoFiles = { [video.id]: video.file };
     responses[task.expId][task.langId][task.annoId][task.taskId] = { ratings, videoFiles };
     Study.setState({ responses });
   }
 
   // ── Navigation ────────────────────────────────────────────────────
-  if (flatIdx === flatList.length - 1) {
+  if (flatIdx === NPAGES - 1) {
     nextBtn.innerHTML = "Finish &#10003;";
   }
 
   nextBtn.addEventListener("click", () => {
     if (!allAnswered()) {
       document.getElementById("validation-msg").textContent =
-        "Please answer all three questions before continuing.";
+        "Please answer all questions before continuing.";
       return;
     }
     saveResponse();
     // Build id→file map so the server can write real filenames to the CSV
-    const videoFiles = Object.fromEntries(task.videos.map(v => [v.id, v.file]));
+    const videoFiles = { [video.id]: video.file };
     Study.submitResponse(task, ratings, videoFiles);
     const nextIdx = flatIdx + 1;
-    if (nextIdx >= flatList.length) {
+    if (nextIdx >= NPAGES) {
       Study.goto("complete.html");
     } else if (flatList[nextIdx].isFirstInLanguage) {
       Study.goto("language-intro.html?idx=" + nextIdx);

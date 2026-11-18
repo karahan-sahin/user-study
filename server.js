@@ -15,13 +15,17 @@ app.get("/js/server-port.js", (req, res) => {
   res.sendFile(path.join(__dirname, "js", "server-port.js"));
 });
 
-app.use(express.static(__dirname));
+// Only serve what the study pages need. NOT the project root: that would expose
+// key.pem, server.js, results/*.csv (participant data) and node_modules to the internet.
+["css", "js", "assets"].forEach(d => app.use("/" + d, express.static(path.join(__dirname, d))));
+["index", "assessment", "instructions", "language-intro", "experiment", "complete"].forEach(n =>
+  app.get(["/" + n + ".html", ...(n === "index" ? ["/"] : [])], (req, res) => res.sendFile(path.join(__dirname, n + ".html"))));
 
 // Serve video files without .mp4 extension to bypass proxies that block by URL pattern.
 // Browser requests /vid/assets/experiment1/.../filename  → serves filename.mp4
 app.get("/vid/*", (req, res) => {
   const filePath = path.join(__dirname, req.params[0] + ".mp4");
-  if (!filePath.startsWith(__dirname) || !fs.existsSync(filePath)) {
+  if (!filePath.startsWith(path.join(__dirname, "assets") + path.sep) || !fs.existsSync(filePath)) {
     return res.status(404).end();
   }
   res.set("Content-Type", "application/octet-stream");
@@ -43,7 +47,17 @@ function appendCSV(csvPath, header, newRows, participantId, taskId = null) {
     fs.writeFileSync(csvPath, header + block, "utf8");
     return;
   }
-  const lines = fs.readFileSync(csvPath, "utf8").split("\n");
+  let lines = fs.readFileSync(csvPath, "utf8").split("\n");
+  // Migrate an older file that predates the "grammar" column: insert an empty value before submitted_at.
+  if (lines[0] && !lines[0].includes("grammar")) {
+    lines = lines.map((line, i) => {
+      if (i === 0) return header.trim();
+      if (line === "") return line;
+      const cols = line.split(",");
+      cols.splice(cols.length - 1 - 2, 0, '""');   // after quality (…quality,visual,natural,submitted_at → before visual)
+      return cols.join(",");
+    });
+  }
   const kept  = lines.filter(line => {
     if (line === "" || line.startsWith("participant_id")) return true;
     const cols = line.split(",");
@@ -55,15 +69,15 @@ function appendCSV(csvPath, header, newRows, participantId, taskId = null) {
 }
 
 const CSV_HEADER =
-  "participant_id,signing_level,language,anno_type,example_id,label,understand,meaning,quality,submitted_at\n";
+  "participant_id,signing_level,language,anno_type,example_id,label,understand,meaning,quality,grammar,visual,natural,submitted_at\n";
 
-// Build one CSV row per rated video from a nested { videoId: { understand, meaning, quality } } object
+// Build one CSV row per rated video from a nested { videoId: { understand, meaning, quality, visual, natural } } object
 function ratingRows(ratings, files, participantId, signingLevel, langId, annoId, taskId, timestamp) {
   return Object.entries(ratings || {}).map(([videoId, scores]) => {
     const file = files[videoId] || videoId;
     const s = scores || {};
     return `"${participantId}","${signingLevel || ""}","${langId}","${annoId}","${taskId}","${getLabel(file)}",` +
-           `"${s.understand ?? ""}","${s.meaning ?? ""}","${s.quality ?? ""}","${timestamp}"`;
+           `"${s.understand ?? ""}","${s.meaning ?? ""}","${s.quality ?? ""}","${s.grammar ?? ""}","${s.visual ?? ""}","${s.natural ?? ""}","${timestamp}"`;
   });
 }
 
@@ -107,7 +121,7 @@ app.post("/api/results", (req, res) => {
 
   try {
     // responses shape: { [expId]: { [langId]: { [annoId]: { [taskId]: { ratings, videoFiles } } } } }
-    // ratings: { [videoId]: { understand, meaning, quality } }
+    // ratings: { [videoId]: { understand, meaning, quality, visual, natural } }
     Object.entries(responses).forEach(([expId, languages]) => {
       const rows = [];
 

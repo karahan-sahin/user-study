@@ -5,11 +5,15 @@
  * Regenerate with:  node generate-config.js
  *
  * Structure:  experiments → languages → annotationTypes → tasks(examples) → videos
- * Each example shows an English sentence; the participant answers the 3 questions
+ * Each example shows an English sentence; the participant answers the 6 questions
  * below for every video. Place files under  assets/<experiment>/<language>/<annotationType>/<example>/
  */
 
 const STUDY_CONFIG = {
+
+  conditionSlots: 8,
+  conditionPattern: [0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7],
+  pagesPerParticipant: 16,
 
   title: "Duet — BSL Translation Study",
   institution: "Your Institution",
@@ -18,11 +22,14 @@ const STUDY_CONFIG = {
   questions: [
     { id: "understand", text: "How easy is this signing to understand?", labels: ["Very Difficult", "Difficult", "Acceptable", "Easy", "Very Easy"] },
     { id: "meaning", text: "Does it convey the same meaning as the English text?", labels: ["Not at all", "Slightly", "Moderately", "Mostly", "Completely"] },
-    { id: "quality", text: "Quality of the translation (BSL grammar & style)", labels: ["Very Poor", "Poor", "Acceptable", "Good", "Excellent"] }
+    { id: "quality", text: "How good is the translation in terms of sign language grammar and style?", labels: ["Very Poor", "Poor", "Acceptable", "Good", "Excellent"] },
+    { id: "grammar", text: "Looking only at the grammar (sign order and sentence structure), how grammatical is this BSL? Ignore meaning, vocabulary and how the avatar looks.", labels: ["Very Ungrammatical", "Ungrammatical", "Acceptable", "Grammatical", "Very Grammatical"] },
+    { id: "visual", text: "How good is the visual quality of the avatar (sharpness, artefacts, realism), ignoring the signing itself?", labels: ["Very Poor", "Poor", "Acceptable", "Good", "Excellent"] },
+    { id: "natural", text: "How natural is the motion (smooth, human-like, not robotic)?", labels: ["Very Unnatural", "Unnatural", "Acceptable", "Natural", "Very Natural"] }
   ],
 
   signingLevels: [
-    { id: "dont_know", name: "Don't Know", description: "I have no knowledge of sign language." },
+    { id: "dont_know", name: "None", description: "I have no knowledge of sign language." },
     { id: "beginner", name: "Beginner", description: "I know a few basic signs and the manual alphabet." },
     { id: "intermediate", name: "Intermediate", description: "I can hold conversations on familiar topics." },
     { id: "fluent", name: "Fluent", description: "I sign fluently with good grammar and expression." }
@@ -30,15 +37,15 @@ const STUDY_CONFIG = {
 
   experiments: [
     {
-      id: "duet",
-      folder: "assets/duet",
-      label: "Duet",
+      id: "experiment2",
+      folder: "assets/experiment2",
+      label: "Experiment2",
       languages: [
         {
           id: "bsl",
           folder: "bsl",
           label: "British Sign Language (BSL)",
-          description: "You will now watch BSL translations of English sentences. BSL is the sign language used by the Deaf community in the United Kingdom. For each example, read the English text, watch each translation video, and answer the three questions about it.",
+          description: "You will now watch BSL translations of English sentences. BSL is the sign language used by the Deaf community in the United Kingdom. For each example, read the English text, watch the translation video, and answer the six questions about it.",
           annotationTypes: [
           {
             id: "rating",
@@ -46,81 +53,24 @@ const STUDY_CONFIG = {
             type: "rating",
             label: "Rating",
             tasks: [
-              { id: "ex01", folder: "ex01", label: "Example 1", english: "The weather tomorrow will be cold with heavy rain in the afternoon.", videos: [ { id: "A", file: "ex01.baseline.mp4", label: "baseline" }, { id: "B", file: "ex01.duet.mp4", label: "duet" }, { id: "C", file: "ex01.groundtruth.mp4", label: "groundtruth" } ] },
-              { id: "ex02", folder: "ex02", label: "Example 2", english: "My sister is a doctor who works at the hospital in London.", videos: [ { id: "A", file: "ex02.baseline.mp4", label: "baseline" }, { id: "B", file: "ex02.duet.mp4", label: "duet" }, { id: "C", file: "ex02.groundtruth.mp4", label: "groundtruth" } ] },
-              { id: "ex03", folder: "ex03", label: "Example 3", english: "Please remember to bring your passport to the airport on Friday.", videos: [ { id: "A", file: "ex03.baseline.mp4", label: "baseline" }, { id: "B", file: "ex03.duet.mp4", label: "duet" }, { id: "C", file: "ex03.groundtruth.mp4", label: "groundtruth" } ] }
-            ]
-          }
-          ]
-        },
-        {
-          id: "dgs",
-          folder: "dgs",
-          label: "Deutsche Gebärdensprache (DGS)",
-          description: "You will now watch DGS translations of English sentences. DGS is the sign language used by the Deaf community in Germany. For each example, read the English text, watch each translation video, and answer the three questions about it.",
-          annotationTypes: [
-          {
-            id: "rating",
-            folder: "rating",
-            type: "rating",
-            label: "Rating",
-            tasks: [
-              { id: "ex01", folder: "ex01", label: "Example 1", english: "The train to Berlin leaves from platform four at nine o'clock.", videos: [ { id: "A", file: "ex01.baseline.mp4", label: "baseline" }, { id: "B", file: "ex01.duet.mp4", label: "duet" }, { id: "C", file: "ex01.groundtruth.mp4", label: "groundtruth" } ] },
-              { id: "ex02", folder: "ex02", label: "Example 2", english: "We are planning to visit the museum together next weekend.", videos: [ { id: "A", file: "ex02.baseline.mp4", label: "baseline" }, { id: "B", file: "ex02.duet.mp4", label: "duet" }, { id: "C", file: "ex02.groundtruth.mp4", label: "groundtruth" } ] }
-            ]
-          }
-          ]
-        }
-      ]
-    },
-    {
-      id: "experiment1",
-      folder: "assets/experiment1",
-      label: "Experiment1",
-      languages: [
-        {
-          id: "bsl",
-          folder: "bsl",
-          label: "British Sign Language (BSL)",
-          description: "You will now watch BSL translations of English sentences. BSL is the sign language used by the Deaf community in the United Kingdom. For each example, read the English text, watch each translation video, and answer the three questions about it.",
-          annotationTypes: [
-          {
-            id: "comparison",
-            folder: "comparison",
-            type: "rating",
-            label: "Rating",
-            tasks: [
-              { id: "bsl_ex10", folder: "bsl_ex10", label: "Example 1", english: "", videos: [ { id: "A", file: "BF13n.5833.5905_smplxp_real_nnorm.mp4", label: "5905_smplxp_real_nnorm" }, { id: "B", file: "ex10_bslcp_gen3_mesh.mp4", label: "ex10_bslcp_gen3_mesh" }, { id: "C", file: "ex10_signbank_gen1_mesh.mp4", label: "ex10_signbank_gen1_mesh" } ] },
-              { id: "bsl_ex11", folder: "bsl_ex11", label: "Example 2", english: "", videos: [ { id: "A", file: "BL5c.5539.5567_smplxp_real_nnorm.mp4", label: "5567_smplxp_real_nnorm" }, { id: "B", file: "ex11_bslcp_gen2_mesh.mp4", label: "ex11_bslcp_gen2_mesh" }, { id: "C", file: "ex11_signbank_gen3_mesh.mp4", label: "ex11_signbank_gen3_mesh" } ] },
-              { id: "bsl_ex12", folder: "bsl_ex12", label: "Example 3", english: "", videos: [ { id: "A", file: "BL4c.17537.17630_smplxp_real_nnorm.mp4", label: "17630_smplxp_real_nnorm" }, { id: "B", file: "ex12_bslcp_gen4_mesh.mp4", label: "ex12_bslcp_gen4_mesh" }, { id: "C", file: "ex12_signbank_gen3_mesh.mp4", label: "ex12_signbank_gen3_mesh" } ] },
-              { id: "bsl_ex13", folder: "bsl_ex13", label: "Example 4", english: "", videos: [ { id: "A", file: "BF13n.5590.5653_smplxp_real_nnorm.mp4", label: "5653_smplxp_real_nnorm" }, { id: "B", file: "ex13_bslcp_gen5_mesh.mp4", label: "ex13_bslcp_gen5_mesh" }, { id: "C", file: "ex13_signbank_gen3_mesh.mp4", label: "ex13_signbank_gen3_mesh" } ] },
-              { id: "bsl_ex14", folder: "bsl_ex14", label: "Example 5", english: "", videos: [ { id: "A", file: "BF2n.5188.5231_smplxp_real_nnorm.mp4", label: "5231_smplxp_real_nnorm" }, { id: "B", file: "ex14_bslcp_gen2_mesh.mp4", label: "ex14_bslcp_gen2_mesh" }, { id: "C", file: "ex14_signbank_gen2_mesh.mp4", label: "ex14_signbank_gen2_mesh" } ] },
-              { id: "bsl_ex22", folder: "bsl_ex22", label: "Example 6", english: "", videos: [ { id: "A", file: "G19n.1645.1782_smplxp_real_nnorm.mp4", label: "1782_smplxp_real_nnorm" }, { id: "B", file: "ex22_bslcp_gen4_mesh.mp4", label: "ex22_bslcp_gen4_mesh" }, { id: "C", file: "ex22_signbank_gen5_mesh.mp4", label: "ex22_signbank_gen5_mesh" } ] },
-              { id: "bsl_ex31", folder: "bsl_ex31", label: "Example 7", english: "", videos: [ { id: "A", file: "BF25n.1053.1106_smplxp_real_nnorm.mp4", label: "1106_smplxp_real_nnorm" }, { id: "B", file: "ex31_bslcp_gen1_mesh.mp4", label: "ex31_bslcp_gen1_mesh" }, { id: "C", file: "ex31_signbank_gen1_mesh.mp4", label: "ex31_signbank_gen1_mesh" } ] },
-              { id: "bsl_ex35", folder: "bsl_ex35", label: "Example 8", english: "", videos: [ { id: "A", file: "BL23c.5823.5899_smplxp_real_nnorm.mp4", label: "5899_smplxp_real_nnorm" }, { id: "B", file: "ex35_bslcp_gen3_mesh.mp4", label: "ex35_bslcp_gen3_mesh" }, { id: "C", file: "ex35_signbank_gen1_mesh.mp4", label: "ex35_signbank_gen1_mesh" } ] },
-              { id: "bsl_ex36", folder: "bsl_ex36", label: "Example 9", english: "", videos: [ { id: "A", file: "BF24n.1132.1230_smplxp_real_nnorm.mp4", label: "1230_smplxp_real_nnorm" }, { id: "B", file: "ex36_bslcp_gen1_mesh.mp4", label: "ex36_bslcp_gen1_mesh" }, { id: "C", file: "ex36_signbank_gen3_mesh.mp4", label: "ex36_signbank_gen3_mesh" } ] },
-              { id: "bsl_ex45", folder: "bsl_ex45", label: "Example 10", english: "", videos: [ { id: "A", file: "M1c.1705.1771_smplxp_real_nnorm.mp4", label: "1771_smplxp_real_nnorm" }, { id: "B", file: "ex45_bslcp_gen2_mesh.mp4", label: "ex45_bslcp_gen2_mesh" }, { id: "C", file: "ex45_signbank_gen2_mesh.mp4", label: "ex45_signbank_gen2_mesh" } ] }
-            ]
-          }
-          ]
-        },
-        {
-          id: "dgs",
-          folder: "dgs",
-          label: "Deutsche Gebärdensprache (DGS)",
-          description: "You will now watch DGS translations of English sentences. DGS is the sign language used by the Deaf community in Germany. For each example, read the English text, watch each translation video, and answer the three questions about it.",
-          annotationTypes: [
-          {
-            id: "comparison",
-            folder: "comparison",
-            type: "rating",
-            label: "Rating",
-            tasks: [
-              { id: "dgs_ex06", folder: "dgs_ex06", label: "Example 1", english: "", videos: [ { id: "A", file: "1583882B-24_smplxp_real_nnorm.mp4", label: "1583882B-24_smplxp_real_nnorm" }, { id: "B", file: "dgs_ex06_dwdgs_gen1_mesh.mp4", label: "dgs_ex06_dwdgs_gen1_mesh" }, { id: "C", file: "dgs_ex06_mdgs_gen4_mesh.mp4", label: "dgs_ex06_mdgs_gen4_mesh" } ] },
-              { id: "dgs_ex07", folder: "dgs_ex07", label: "Example 2", english: "", videos: [ { id: "A", file: "1428805A-125_smplxp_real_nnorm.mp4", label: "1428805A-125_smplxp_real_nnorm" }, { id: "B", file: "dgs_ex07_dwdgs_gen1_mesh.mp4", label: "dgs_ex07_dwdgs_gen1_mesh" }, { id: "C", file: "dgs_ex07_mdgs_gen3_mesh.mp4", label: "dgs_ex07_mdgs_gen3_mesh" } ] },
-              { id: "dgs_ex16", folder: "dgs_ex16", label: "Example 3", english: "", videos: [ { id: "A", file: "1583882A-41_smplxp_real_nnorm.mp4", label: "1583882A-41_smplxp_real_nnorm" }, { id: "B", file: "dgs_ex16_dwdgs_gen1_mesh.mp4", label: "dgs_ex16_dwdgs_gen1_mesh" }, { id: "C", file: "dgs_ex16_mdgs_gen1_mesh.mp4", label: "dgs_ex16_mdgs_gen1_mesh" } ] },
-              { id: "dgs_ex19", folder: "dgs_ex19", label: "Example 4", english: "", videos: [ { id: "A", file: "1204877A-20_smplxp_real_nnorm.mp4", label: "1204877A-20_smplxp_real_nnorm" }, { id: "B", file: "dgs_ex19_dwdgs_gen2_mesh.mp4", label: "dgs_ex19_dwdgs_gen2_mesh" }, { id: "C", file: "dgs_ex19_mdgs_gen4_mesh.mp4", label: "dgs_ex19_mdgs_gen4_mesh" } ] },
-              { id: "dgs_ex20", folder: "dgs_ex20", label: "Example 5", english: "", videos: [ { id: "A", file: "1211283B-37_smplxp_real_nnorm.mp4", label: "1211283B-37_smplxp_real_nnorm" }, { id: "B", file: "dgs_ex20_dwdgs_gen3_mesh.mp4", label: "dgs_ex20_dwdgs_gen3_mesh" }, { id: "C", file: "dgs_ex20_mdgs_gen5_mesh.mp4", label: "dgs_ex20_mdgs_gen5_mesh" } ] }
+              { id: "sent_000", folder: "sent_000", label: "Example 1", english: "My friend Daniel moved from Surrey to Aberystwyth last month.", videos: [ { id: "A", file: "0_86bf5d.mp4", label: "0_86bf5d" }, { id: "B", file: "1_39663c.mp4", label: "1_39663c" }, { id: "C", file: "2_30afd6.mp4", label: "2_30afd6" }, { id: "D", file: "3_c87d56.mp4", label: "3_c87d56" }, { id: "E", file: "4_64f10f.mp4", label: "4_64f10f" }, { id: "F", file: "5_a1896e.mp4", label: "5_a1896e" }, { id: "G", file: "6_473a31.mp4", label: "6_473a31" }, { id: "H", file: "7_1569a0.mp4", label: "7_1569a0" } ] },
+              { id: "sent_002", folder: "sent_002", label: "Example 2", english: "We watched a documentary about DNA on BBC last night.", videos: [ { id: "A", file: "0_4b3619.mp4", label: "0_4b3619" }, { id: "B", file: "1_7ab04a.mp4", label: "1_7ab04a" }, { id: "C", file: "2_213194.mp4", label: "2_213194" }, { id: "D", file: "3_b07e2e.mp4", label: "3_b07e2e" }, { id: "E", file: "4_ee1f3d.mp4", label: "4_ee1f3d" }, { id: "F", file: "5_c4dc7a.mp4", label: "5_c4dc7a" }, { id: "G", file: "6_cb2f7c.mp4", label: "6_cb2f7c" }, { id: "H", file: "7_7a4240.mp4", label: "7_7a4240" } ] },
+              { id: "sent_003", folder: "sent_003", label: "Example 3", english: "She ordered a latte and a croissant at the café.", videos: [ { id: "A", file: "0_7c0bd7.mp4", label: "0_7c0bd7" }, { id: "B", file: "1_489bd5.mp4", label: "1_489bd5" }, { id: "C", file: "2_74c6d7.mp4", label: "2_74c6d7" }, { id: "D", file: "3_ae5cae.mp4", label: "3_ae5cae" }, { id: "E", file: "4_cb387a.mp4", label: "4_cb387a" }, { id: "F", file: "5_0c3fe8.mp4", label: "5_0c3fe8" }, { id: "G", file: "6_cc4209.mp4", label: "6_cc4209" }, { id: "H", file: "7_db0f37.mp4", label: "7_db0f37" } ] },
+              { id: "sent_004", folder: "sent_004", label: "Example 4", english: "I need to buy three things: bread, milk, and eggs.", videos: [ { id: "A", file: "0_caef92.mp4", label: "0_caef92" }, { id: "B", file: "1_dd5834.mp4", label: "1_dd5834" }, { id: "C", file: "2_6d7048.mp4", label: "2_6d7048" }, { id: "D", file: "3_d7741d.mp4", label: "3_d7741d" }, { id: "E", file: "4_b6b4ca.mp4", label: "4_b6b4ca" }, { id: "F", file: "5_c8c47d.mp4", label: "5_c8c47d" }, { id: "G", file: "6_f040dd.mp4", label: "6_f040dd" }, { id: "H", file: "7_605473.mp4", label: "7_605473" } ] },
+              { id: "sent_005", folder: "sent_005", label: "Example 5", english: "There are four seasons: spring, summer, autumn, and winter.", videos: [ { id: "A", file: "0_aa4137.mp4", label: "0_aa4137" }, { id: "B", file: "1_fbf238.mp4", label: "1_fbf238" }, { id: "C", file: "2_c607a8.mp4", label: "2_c607a8" }, { id: "D", file: "3_e6d2f1.mp4", label: "3_e6d2f1" }, { id: "E", file: "4_e466b9.mp4", label: "4_e466b9" }, { id: "F", file: "5_41f20c.mp4", label: "5_41f20c" }, { id: "G", file: "6_335f3d.mp4", label: "6_335f3d" }, { id: "H", file: "7_750ad3.mp4", label: "7_750ad3" } ] },
+              { id: "sent_006", folder: "sent_006", label: "Example 6", english: "My favourite hobbies are reading, swimming, and cooking.", videos: [ { id: "A", file: "0_b3277c.mp4", label: "0_b3277c" }, { id: "B", file: "1_e5960e.mp4", label: "1_e5960e" }, { id: "C", file: "2_f770f5.mp4", label: "2_f770f5" }, { id: "D", file: "3_190429.mp4", label: "3_190429" }, { id: "E", file: "4_4c7fdb.mp4", label: "4_4c7fdb" }, { id: "F", file: "5_a45345.mp4", label: "5_a45345" }, { id: "G", file: "6_5cef4d.mp4", label: "6_5cef4d" }, { id: "H", file: "7_5f7222.mp4", label: "7_5f7222" } ] },
+              { id: "sent_007", folder: "sent_007", label: "Example 7", english: "My daughter is seven years old and starts school at nine o'clock.", videos: [ { id: "A", file: "0_1fc3ca.mp4", label: "0_1fc3ca" }, { id: "B", file: "1_0737e1.mp4", label: "1_0737e1" }, { id: "C", file: "2_4d0ab9.mp4", label: "2_4d0ab9" }, { id: "D", file: "3_bbbd29.mp4", label: "3_bbbd29" }, { id: "E", file: "4_8c8780.mp4", label: "4_8c8780" }, { id: "F", file: "5_497f5d.mp4", label: "5_497f5d" }, { id: "G", file: "6_6db2bc.mp4", label: "6_6db2bc" }, { id: "H", file: "7_0dca3d.mp4", label: "7_0dca3d" } ] },
+              { id: "sent_009", folder: "sent_009", label: "Example 8", english: "I have lived in this house for fifteen years.", videos: [ { id: "A", file: "0_98d3f5.mp4", label: "0_98d3f5" }, { id: "B", file: "1_6f12f5.mp4", label: "1_6f12f5" }, { id: "C", file: "2_9cb5b3.mp4", label: "2_9cb5b3" }, { id: "D", file: "3_5bf759.mp4", label: "3_5bf759" }, { id: "E", file: "4_f3d8d5.mp4", label: "4_f3d8d5" }, { id: "F", file: "5_f3ec02.mp4", label: "5_f3ec02" }, { id: "G", file: "6_43dd53.mp4", label: "6_43dd53" }, { id: "H", file: "7_d05562.mp4", label: "7_d05562" } ] },
+              { id: "sent_010", folder: "sent_010", label: "Example 9", english: "The car drove slowly up the steep hill and parked outside.", videos: [ { id: "A", file: "0_71bf90.mp4", label: "0_71bf90" }, { id: "B", file: "1_61cc60.mp4", label: "1_61cc60" }, { id: "C", file: "2_b525b1.mp4", label: "2_b525b1" }, { id: "D", file: "3_8e0f87.mp4", label: "3_8e0f87" }, { id: "E", file: "4_364c79.mp4", label: "4_364c79" }, { id: "F", file: "5_3d1b15.mp4", label: "5_3d1b15" }, { id: "G", file: "6_9a69a6.mp4", label: "6_9a69a6" }, { id: "H", file: "7_67f2f5.mp4", label: "7_67f2f5" } ] },
+              { id: "sent_011", folder: "sent_011", label: "Example 10", english: "A tall man walked across the road and stood near the tree.", videos: [ { id: "A", file: "0_97ce06.mp4", label: "0_97ce06" }, { id: "B", file: "1_e5f60d.mp4", label: "1_e5f60d" }, { id: "C", file: "2_675bf2.mp4", label: "2_675bf2" }, { id: "D", file: "3_d55379.mp4", label: "3_d55379" }, { id: "E", file: "4_d34b02.mp4", label: "4_d34b02" }, { id: "F", file: "5_66d7c8.mp4", label: "5_66d7c8" }, { id: "G", file: "6_5d46e0.mp4", label: "6_5d46e0" }, { id: "H", file: "7_246e2f.mp4", label: "7_246e2f" } ] },
+              { id: "sent_012", folder: "sent_012", label: "Example 11", english: "The plane flew over the mountains and landed in the valley.", videos: [ { id: "A", file: "0_37373a.mp4", label: "0_37373a" }, { id: "B", file: "1_6ae46e.mp4", label: "1_6ae46e" }, { id: "C", file: "2_647a1a.mp4", label: "2_647a1a" }, { id: "D", file: "3_9efe22.mp4", label: "3_9efe22" }, { id: "E", file: "4_c282e7.mp4", label: "4_c282e7" }, { id: "F", file: "5_390fa8.mp4", label: "5_390fa8" }, { id: "G", file: "6_2d7cb1.mp4", label: "6_2d7cb1" }, { id: "H", file: "7_72b3b0.mp4", label: "7_72b3b0" } ] },
+              { id: "sent_013", folder: "sent_013", label: "Example 12", english: "I did not finish my homework because I was too tired.", videos: [ { id: "A", file: "0_cd7e49.mp4", label: "0_cd7e49" }, { id: "B", file: "1_b39116.mp4", label: "1_b39116" }, { id: "C", file: "2_439452.mp4", label: "2_439452" }, { id: "D", file: "3_25d790.mp4", label: "3_25d790" }, { id: "E", file: "4_2d43fd.mp4", label: "4_2d43fd" }, { id: "F", file: "5_55bfa9.mp4", label: "5_55bfa9" }, { id: "G", file: "6_e90891.mp4", label: "6_e90891" }, { id: "H", file: "7_924c03.mp4", label: "7_924c03" } ] },
+              { id: "sent_014", folder: "sent_014", label: "Example 13", english: "She has never been to London and does not want to go.", videos: [ { id: "A", file: "0_d07d0b.mp4", label: "0_d07d0b" }, { id: "B", file: "1_b4a98c.mp4", label: "1_b4a98c" }, { id: "C", file: "2_54caa5.mp4", label: "2_54caa5" }, { id: "D", file: "3_802924.mp4", label: "3_802924" }, { id: "E", file: "4_d0bf69.mp4", label: "4_d0bf69" }, { id: "F", file: "5_972429.mp4", label: "5_972429" }, { id: "G", file: "6_dd4eef.mp4", label: "6_dd4eef" }, { id: "H", file: "7_058622.mp4", label: "7_058622" } ] },
+              { id: "sent_015", folder: "sent_015", label: "Example 14", english: "That restaurant near the river, the food there is excellent.", videos: [ { id: "A", file: "0_a1e394.mp4", label: "0_a1e394" }, { id: "B", file: "1_99bbd0.mp4", label: "1_99bbd0" }, { id: "C", file: "2_f37a6b.mp4", label: "2_f37a6b" }, { id: "D", file: "3_02470d.mp4", label: "3_02470d" }, { id: "E", file: "4_093d6e.mp4", label: "4_093d6e" }, { id: "F", file: "5_55a02b.mp4", label: "5_55a02b" }, { id: "G", file: "6_98ee28.mp4", label: "6_98ee28" }, { id: "H", file: "7_f47e62.mp4", label: "7_f47e62" } ] },
+              { id: "sent_016", folder: "sent_016", label: "Example 15", english: "My old car, I sold it last year for very little money.", videos: [ { id: "A", file: "0_153037.mp4", label: "0_153037" }, { id: "B", file: "1_9fd48e.mp4", label: "1_9fd48e" }, { id: "C", file: "2_6bcc95.mp4", label: "2_6bcc95" }, { id: "D", file: "3_ec7aaf.mp4", label: "3_ec7aaf" }, { id: "E", file: "4_4cb8a0.mp4", label: "4_4cb8a0" }, { id: "F", file: "5_30c020.mp4", label: "5_30c020" }, { id: "G", file: "6_8e79cd.mp4", label: "6_8e79cd" }, { id: "H", file: "7_273f63.mp4", label: "7_273f63" } ] },
+              { id: "sent_017", folder: "sent_017", label: "Example 16", english: "My mother said, \"Clean your room before dinner.\"", videos: [ { id: "A", file: "0_c4e7bc.mp4", label: "0_c4e7bc" }, { id: "B", file: "1_dd94ec.mp4", label: "1_dd94ec" }, { id: "C", file: "2_fdfa89.mp4", label: "2_fdfa89" }, { id: "D", file: "3_495753.mp4", label: "3_495753" }, { id: "E", file: "4_41c41d.mp4", label: "4_41c41d" }, { id: "F", file: "5_0a7441.mp4", label: "5_0a7441" }, { id: "G", file: "6_f57ef8.mp4", label: "6_f57ef8" }, { id: "H", file: "7_75f425.mp4", label: "7_75f425" } ] },
+              { id: "sent_018", folder: "sent_018", label: "Example 17", english: "He asked me if I wanted to come to the party on Saturday.", videos: [ { id: "A", file: "0_50de5f.mp4", label: "0_50de5f" }, { id: "B", file: "1_8acb6c.mp4", label: "1_8acb6c" }, { id: "C", file: "2_cf0651.mp4", label: "2_cf0651" }, { id: "D", file: "3_6a15f2.mp4", label: "3_6a15f2" }, { id: "E", file: "4_618aa5.mp4", label: "4_618aa5" }, { id: "F", file: "5_204a66.mp4", label: "5_204a66" }, { id: "G", file: "6_700d5c.mp4", label: "6_700d5c" }, { id: "H", file: "7_ff1cbe.mp4", label: "7_ff1cbe" } ] },
+              { id: "sent_019", folder: "sent_019", label: "Example 18", english: "The reason I was late is simple: the bus never came.", videos: [ { id: "A", file: "0_a6e9f3.mp4", label: "0_a6e9f3" }, { id: "B", file: "1_36c2b3.mp4", label: "1_36c2b3" }, { id: "C", file: "2_2ce53b.mp4", label: "2_2ce53b" }, { id: "D", file: "3_1a8b05.mp4", label: "3_1a8b05" }, { id: "E", file: "4_877c58.mp4", label: "4_877c58" }, { id: "F", file: "5_0b493f.mp4", label: "5_0b493f" }, { id: "G", file: "6_c929de.mp4", label: "6_c929de" }, { id: "H", file: "7_c523e7.mp4", label: "7_c523e7" } ] }
             ]
           }
           ]
@@ -132,14 +82,15 @@ const STUDY_CONFIG = {
 };
 
 // Flat page list for sequential navigation (do not edit).
-// One page PER VIDEO: each example's videos are expanded into separate pages.
-// "slot" is the video's position within its example; the client picks which video
-// fills that slot via a per-participant seeded shuffle of task.videos.
+// One page PER EXAMPLE (sentence). Each example folder holds one video per condition
+// (files sorted by name: 0_*, 1_*, ...). The client shows exactly ONE of them to each
+// participant, rotated by (example index + participant group) so every participant sees
+// every condition about equally often and every sentence is seen in all conditions
+// across participants.
 STUDY_CONFIG._flatTasks = STUDY_CONFIG.experiments.flatMap(exp =>
   exp.languages.flatMap(lang =>
     lang.annotationTypes.flatMap(anno =>
-      anno.tasks.flatMap(task =>
-        task.videos.map((video, slot) => ({
+      anno.tasks.map(task => ({
           expId:     exp.id,
           expLabel:  exp.label,
           langId:    lang.id,
@@ -151,10 +102,8 @@ STUDY_CONFIG._flatTasks = STUDY_CONFIG.experiments.flatMap(exp =>
           taskLabel: task.label,
           english:   task.english,
           videos:    task.videos,
-          slot:      slot,
           videoPath: exp.folder + "/" + lang.folder + "/" + anno.folder + "/" + task.folder
-        }))
-      )
+      }))
     )
   )
 );

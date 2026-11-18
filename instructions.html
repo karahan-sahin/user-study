@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Before You Begin — Duet BSL Translation Study</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .notice {
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 18px 0 6px;
+      font-size: .95rem;
+      line-height: 1.6;
+    }
+    .q-def { font-size: .9rem; line-height: 1.55; }
+    .q-def strong { display: block; margin-bottom: 2px; }
+    .q-def em { color: var(--text-muted); font-style: normal; }
+    .confirm {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-top: 22px; font-size: .92rem; line-height: 1.5; cursor: pointer;
+    }
+    .confirm input { margin-top: 4px; width: 17px; height: 17px; flex: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="header-logo" id="header-title">Sign Language Study</span>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <span class="progress-label" id="progress-label"></span>
+</header>
+
+<main class="page">
+  <div class="card">
+    <h1>Before you begin</h1>
+    <p class="subtitle">Please read this short note. It explains how to give your ratings.</p>
+
+    <div class="notice">
+      <strong>Judge every question separately.</strong>
+      Each page shows <strong>one</strong> video and asks <strong>six different questions</strong>.
+      Answer each question on its own, based only on what that question asks.
+      Please do not let your impression of one aspect decide your answers to the others.
+    </div>
+
+    <ul class="info-list">
+      <li>
+        <span class="icon">&#128250;</span>
+        <span>
+          <strong>Each video is independent.</strong> Rate it by itself. Do not compare it with
+          earlier videos, and do not try to work out how a video was made.
+          Different videos may use different avatars, styles or quality.
+        </span>
+      </li>
+      <li>
+        <span class="icon">&#9878;</span>
+        <span>
+          <strong>Separate aspects can differ.</strong> A video can look sharp but be hard to
+          understand, move smoothly but carry the wrong meaning, or look blurry yet be easy to
+          follow. Rate each aspect on its own merits.
+        </span>
+      </li>
+    </ul>
+
+    <hr class="divider" />
+
+    <p style="font-weight:600; margin-bottom:6px;">The six questions</p>
+    <ul class="info-list">
+      <li><span class="icon">1</span><div class="q-def">
+        <strong>How easy is it to understand?</strong>
+        <em>How easily you can follow the signing, whatever the English sentence says.</em></div></li>
+      <li><span class="icon">2</span><div class="q-def">
+        <strong>Does it convey the same meaning as the English text?</strong>
+        <em>Compare the meaning of the signing with the English sentence shown above the video.
+        Ignore how the video looks.</em></div></li>
+      <li><span class="icon">3</span><div class="q-def">
+        <strong>Quality of the translation (grammar and style).</strong>
+        <em>Whether the signing is grammatical, well formed and natural as a translation,
+        not just whether single signs are correct.</em></div></li>
+      <li><span class="icon">4</span><div class="q-def">
+        <strong>Grammar only.</strong>
+        <em>Only the grammar: is the order of the signs and the structure of the sentence correct BSL?
+        Ignore the meaning, the choice of vocabulary and how the avatar looks.</em></div></li>
+      <li><span class="icon">5</span><div class="q-def">
+        <strong>Visual quality of the avatar.</strong>
+        <em>Sharpness, artifacts, realism of the person and hands. Ignore what is being signed.</em></div></li>
+      <li><span class="icon">6</span><div class="q-def">
+        <strong>Naturalness of the motion.</strong>
+        <em>Whether the movement is smooth and human-like rather than stiff or robotic.
+        Ignore the meaning of what is signed.</em></div></li>
+    </ul>
+
+    <p style="font-size:.88rem; color:var(--text-muted); line-height:1.6; margin-top:14px;">
+      There are no right or wrong answers. You can watch each video as many times as you like.
+      Please answer honestly, using the full 1&ndash;5 scale.
+    </p>
+
+    <label class="confirm">
+      <input type="checkbox" id="confirm-box" />
+      <span>I understand that I should rate each question separately and treat every video on its own.</span>
+    </label>
+
+    <div class="btn-group">
+      <button class="btn btn-secondary" id="prev-btn">&larr; Back</button>
+      <button class="btn btn-primary" id="next-btn" disabled>Continue &rarr;</button>
+    </div>
+  </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/study.js"></script>
+<script>
+  const totalSteps = 3 + Math.min(STUDY_CONFIG.pagesPerParticipant || STUDY_CONFIG._flatTasks.length, STUDY_CONFIG._flatTasks.length); // intro + assessment + instructions + all tasks
+  document.getElementById("header-title").textContent = STUDY_CONFIG.title;
+  Study.renderProgress(3, totalSteps);
+
+  const box = document.getElementById("confirm-box");
+  const nextBtn = document.getElementById("next-btn");
+  box.checked = !!Study.getState().readInstructions;
+  nextBtn.disabled = !box.checked;
+  box.addEventListener("change", () => { nextBtn.disabled = !box.checked; });
+
+  nextBtn.addEventListener("click", () => {
+    Study.setState({ readInstructions: true });
+    Study.goto("language-intro.html?idx=0");
+  });
+  document.getElementById("prev-btn").addEventListener("click", () => Study.goto("assessment.html"));
+</script>
+</body>
+</html>

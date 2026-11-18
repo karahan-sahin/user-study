@@ -41,7 +41,7 @@
 <script src="js/config.js"></script>
 <script src="js/study.js"></script>
 <script>
-  const totalSteps = 2 + STUDY_CONFIG._flatTasks.length; // intro + assessment + all tasks
+  const totalSteps = 3 + Math.min(STUDY_CONFIG.pagesPerParticipant || STUDY_CONFIG._flatTasks.length, STUDY_CONFIG._flatTasks.length); // intro + assessment + instructions + all tasks
 
   document.getElementById("header-title").textContent = STUDY_CONFIG.title;
   document.getElementById("progress-label").textContent = "2 / " + totalSteps;
@@ -84,8 +84,8 @@
       return;
     }
     Study.setState({ signingLevel: selectedLevel });
-    // Always show the language intro before the first task
-    Study.goto("language-intro.html?idx=0");
+    // Instructions / disclaimer page comes before the first task
+    Study.goto("instructions.html");
   });
 </script>
 </body>

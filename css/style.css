@@ -363,7 +363,7 @@ h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
   padding: 18px;
 }
 
-.vid-wrap { flex: 0 0 360px; }
+.vid-wrap { flex: 0 0 58%; max-width: 720px; position: sticky; top: 72px; align-self: flex-start; }
 
 .vid-caption {
   font-weight: 700;
@@ -375,7 +375,7 @@ h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
 .vid-wrap video {
   width: 100%;
   display: block;
-  max-height: 300px;
+  max-height: 80vh;
   object-fit: contain;
   background: #111;
   border-radius: 10px;
@@ -430,9 +430,9 @@ h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
 .scale-btn.rated .num,
 .scale-btn.rated .lbl { color: #fff; }
 
-@media (max-width: 760px) {
+@media (max-width: 1000px) {
   .video-row { flex-direction: column; }
-  .vid-wrap { flex: 0 0 auto; width: 100%; }
+  .vid-wrap { flex: 0 0 auto; width: 100%; max-width: none; position: static; }
   .scale-btn .lbl { font-size: .6rem; }
 }
 
